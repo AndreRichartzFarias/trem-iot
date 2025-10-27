@@ -1,0 +1,15 @@
+# Environment configuration files - contain sensitive data
+# Remove all env.h files to prevent credential exposure
+
+# Station specific environment files
+/estacao1/env.h
+/estacao2/env.h
+
+# Arduino IDE generated files
+*.hex
+*.elf
+*.bin
+
+# Temporary files
+*.tmp
+*~
