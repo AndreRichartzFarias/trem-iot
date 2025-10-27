@@ -5,6 +5,7 @@
 /estacao1/env.h
 /estacao2/env.h
 
+/trem/env.h
 # Arduino IDE generated files
 *.hex
 *.elf
