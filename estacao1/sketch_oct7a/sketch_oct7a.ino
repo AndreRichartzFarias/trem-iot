@@ -6,18 +6,20 @@
 WiFiClientSecure wifi_client;
 PubSubClient mqtt(wifi_client);
 
-
-const String brokerUser = "";
-const String brokerPass = "";
-
-
-const byte pinLED = 2; // 
+// Debug function to send messages to RailFlow/S1/Temp1
+void sendDebugMessage(String message) {
+  String debugMsg = "DEBUG: " + message;
+  mqtt.publish(TOPIC_DEBUG, debugMsg.c_str());
+  Serial.print("Debug message sent to ");
+  Serial.print(TOPIC_DEBUG);
+  Serial.print(": ");
+  Serial.println(debugMsg);
+}
 
 void setup() {
   Serial.begin(115200);
   wifi_client.setInsecure();
-  pinMode(pinLED, OUTPUT);
-  digitalWrite(pinLED, LOW);
+  
   WiFi.begin(WIFI_SSID, WIFI_PASS);  
   Serial.println("Conectando no WiFi");
   while (WiFi.status() != WL_CONNECTED) {
@@ -25,42 +27,42 @@ void setup() {
     delay(200);
   }
   Serial.println("Conectado com sucesso!");
-
-  mqtt.setServer(BROKER_URL.c_str(), BROKER_PORT);
+  mqtt.setServer(BROKER_URL, BROKER_PORT);
   String clientID = "AndreFarias";
   clientID += String(random(0xffff), HEX);
-  while (mqtt.connect(clientID.c_str()) == 0) {
-    Serial.print(".");
-    delay(2000);
+  
+  Serial.println("Conectando ao broker MQTT...");
+  while (!mqtt.connect(clientID.c_str(), BROKER_USR_ID, BROKER_USR_PASS)) {
+    Serial.print("Falha na conexão MQTT, código: ");
+    Serial.print(mqtt.state());
+    Serial.println(" - Tentando novamente em 5 segundos...");
+    delay(5000);
   }
-  mqtt.subscribe(TOPIC_PRESENCE1.c_str());
   mqtt.setCallback(callback);
   Serial.println("\nConectado ao broker!");
+  
+  // Send initial debug message
+  sendDebugMessage("Sistema inicializado com sucesso");
 }
 
 void loop() {
   mqtt.loop();
 
-  // Ler dados da Serial e enviar
+  // Send periodic debug message every 30 seconds
+  static unsigned long lastDebugTime = 0;
+  if (millis() - lastDebugTime > 30000) {
+    sendDebugMessage("Sistema funcionando - Uptime: " + String(millis()/1000) + "s");
+    lastDebugTime = millis();
+  }
+
+  // Check for debug command via Serial
   if (Serial.available() > 0) {               
     String mensagem = Serial.readStringUntil('\n');  
-    mensagem.trim(); // Remove quebras de linha extras
-    // Lógica para ligar/desligar o LED da dupla enviando uma mensagem em números true/false
-    if (mensagem == "1") {
-      digitalWrite(pinLED, HIGH);
-      Serial.println("LED LIGADO (comando serial)");
-      mqtt.publish(TOPIC_PRESENCE1.c_str(), "LED ON");
-    } 
-    else if (mensagem == "0") { 
-      digitalWrite(pinLED, LOW);
-      Serial.println("LED DESLIGADO (comando serial)");
-      mqtt.publish(TOPIC_PRESENCE1.c_str(), "LED OFF");
-    } 
-    else {
-      String texto = "Andre: " + mensagem;
-      mqtt.publish("LauraKrueger", texto.c_str());
-      Serial.print("Mensagem enviada: ");
-      Serial.println(texto);
+    mensagem.trim();
+    
+    if (mensagem.startsWith("debug:")) {
+      String debugText = mensagem.substring(6); // Remove "debug:" prefix
+      sendDebugMessage(debugText);
     }
   }
 }
@@ -70,12 +72,7 @@ void loop() {
 void callback(char* topic, byte* payload, unsigned long length) {
   String mensagem_recebida = "";
   for(int i=0; i< length; i++){
-    mensagem_recebida += (char) payload[i]; // Agrupa cada caracter recebida func payload[variavel]
+    mensagem_recebida += (char) payload[i];
   }
-  Serial.println(mensagem_recebida); // Colocar o LED Pino2
-}
-
-
-void connecttoBroker(){
-  Serial.println("Conectando ao broker...");
+  Serial.println("Mensagem recebida: " + mensagem_recebida);
 }
