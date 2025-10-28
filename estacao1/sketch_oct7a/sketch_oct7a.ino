@@ -1,8 +1,9 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 #include "env.h"
 
-WiFiClient wifi_client;
+WiFiClientSecure wifi_client;
 PubSubClient mqtt(wifi_client);
 
 
@@ -14,6 +15,7 @@ const byte pinLED = 2; //
 
 void setup() {
   Serial.begin(115200);
+  wifi_client.setInsecure();
   pinMode(pinLED, OUTPUT);
   digitalWrite(pinLED, LOW);
   WiFi.begin(WIFI_SSID, WIFI_PASS);  
