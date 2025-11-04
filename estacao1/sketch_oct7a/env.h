@@ -14,10 +14,25 @@
 #define BROKER_USR_ID "AndreFarias" // ---Sensor ID 1---
 #define BROKER_USR_PASS "AndreFarias1" // ---Sensors Password---
 
-// ---Depending on the folder sensor, define the topic to publish/subscribe---
-#define TOPIC_PRESENCE1 ""
-
-// ---Debug topic---
+// Debug topic used by the sketch
 #define TOPIC_DEBUG "RailFlow/S1/Temp1"
+
+// --- Mappings for in-sketch names (keeps backwards compatibility) ---
+#define MQTT_BROKER_CONN BROKER_URL
+#define MQTT_PORT_CONN BROKER_PORT
+#define MQTT_USER_CONN BROKER_USR_ID
+#define MQTT_PASSWORD_CONN BROKER_USR_PASS
+
+#define WIFI_CONN_SSID WIFI_SSID
+#define WIFI_CONN_PASSWORD WIFI_PASS
+
+// --- Station S1 topics  ---
+#define topicTemperatureSensor "RailFlow/S1/Temp"
+#define topicHumiditySensor    "RailFlow/S1/Umid"
+#define topicLuminanceSensor   "RailFlow/S1/Lum"
+#define topicPresenceSensor1   "RailFlow/S1/Presenca1"
+
+// Keep debug topic accessible by the sketch
+#define topicDebug TOPIC_DEBUG
 
 #endif
