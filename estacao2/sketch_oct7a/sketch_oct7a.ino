@@ -13,7 +13,7 @@
 #define LED_YELLOW_PIN 19
 
 // Configuration constants
-#define PRESENCE_THRESHOLD 50.0  // cm
+#define PRESENCE_THRESHOLD 20.0  // cm
 #define SENSOR_READ_INTERVAL 5000 // ms
 
 Ultrasonic ultrasonic1(ULTRA_TRIG_PIN_1, ULTRA_ECHO_PIN_1);
@@ -71,26 +71,21 @@ void loop() {
 }
 
 void readSensors() {
-    unsigned long currentTime = millis();
     float distance1 = ultrasonic1.read();
     float distance2 = ultrasonic2.read();
-    bool currentPresence1 = (distance1 < PRESENCE_THRESHOLD);
-    bool currentPresence2 = (distance2 < PRESENCE_THRESHOLD);
+    bool presence1 = (distance1 < PRESENCE_THRESHOLD);
+    bool presence2 = (distance2 < PRESENCE_THRESHOLD);
     static bool lastPresence1 = false;
     static bool lastPresence2 = false;
-    static unsigned long lastChange1 = 0;
-    static unsigned long lastChange2 = 0;
     // Sensor 1
-    if (currentPresence1 != lastPresence1 && (currentTime - lastChange1 > 2000)) {
-        lastPresence1 = currentPresence1;
-        lastChange1 = currentTime;
-        publishData(topicPresenceSensor2_1, currentPresence1 ? "1" : "0");
+    if (presence1 != lastPresence1) {
+        lastPresence1 = presence1;
+        publishData(topicPresenceSensor2_1, presence1 ? "1" : "0");
     }
     // Sensor 2
-    if (currentPresence2 != lastPresence2 && (currentTime - lastChange2 > 2000)) {
-        lastPresence2 = currentPresence2;
-        lastChange2 = currentTime;
-        publishData(topicPresenceSensor2_2, currentPresence2 ? "1" : "0");
+    if (presence2 != lastPresence2) {
+        lastPresence2 = presence2;
+        publishData(topicPresenceSensor2_2, presence2 ? "1" : "0");
     }
 }
 
