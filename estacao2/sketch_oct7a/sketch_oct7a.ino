@@ -5,14 +5,14 @@
 #include "Ultrasonic.h"
 #include "env.h"
 
-// Hardware pin definitions
+
 #define ULTRA_TRIG_PIN_1 22
 #define ULTRA_ECHO_PIN_1 23
 #define ULTRA_TRIG_PIN_2 27
 #define ULTRA_ECHO_PIN_2 33
 #define LED_YELLOW_PIN 19
 
-// Configuration constants
+
 #define PRESENCE_THRESHOLD 20.0  // cm
 #define SENSOR_READ_INTERVAL 5000 // ms
 
