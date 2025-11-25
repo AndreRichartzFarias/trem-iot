@@ -17,6 +17,7 @@ void callback(char* topic, byte* payload, unsigned long length);
 
 // --- Conexão ao broker MQTT ---
 void connectMQTT();
+void connectWiFi();
 
 void setup() {
     Serial.begin(115200);
@@ -29,14 +30,7 @@ void setup() {
     digitalWrite(LED_RE, LOW);
 
     // Conecta ao WiFi
-    Serial.println("Conectando ao WiFi...");
-    wifiClient.setInsecure();
-    WiFi.begin(WIFI_SSID, WIFI_PASS);
-    while (WiFi.status() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(300);
-    }
-    Serial.println("\nWiFi conectado!");
+    connectWiFi();
 
     // Configura MQTT
     mqttClient.setServer(BROKER_URL, BROKER_PORT);
@@ -45,10 +39,50 @@ void setup() {
 }
 
 void loop() {
+    // Garante WiFi sempre conectado
+    if (WiFi.status() != WL_CONNECTED) {
+        connectWiFi();
+    }
+    // Garante MQTT sempre conectado
     if (!mqttClient.connected()) {
         connectMQTT();
     }
     mqttClient.loop();
+}
+
+// --- Conecta ao WiFi ---
+void connectWiFi() {
+    if (WiFi.status() == WL_CONNECTED) return;
+    Serial.print("Reconectando ao WiFi...");
+    wifiClient.setInsecure();
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    unsigned long startTime = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - startTime < 20000) {
+        Serial.print(".");
+        delay(500);
+    }
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println(" Conectado!");
+    } else {
+        Serial.println(" Falhou!");
+    }
+}
+
+// --- Conecta e inscreve no tópico MQTT ---
+void connectMQTT() {
+    if (WiFi.status() != WL_CONNECTED) return;
+    Serial.print("Conectando ao broker...");
+    while (!mqttClient.connected()) {
+        if (mqttClient.connect("RailFlow-S2-Trem", BROKER_USR_ID, BROKER_USR_PASS)) {
+            Serial.println("\nConectado ao MQTT!");
+            mqttClient.subscribe(TOPIC_TREMVEL_S2);
+            Serial.print("Inscrito no tópico: ");
+            Serial.println(TOPIC_TREMVEL_S2);
+        } else {
+            Serial.print(".");
+            delay(2000);
+        }
+    }
 }
 
 // --- Interpreta comando recebido e indica estado ---
@@ -76,22 +110,5 @@ void callback(char* topic, byte* payload, unsigned long length) {
         digitalWrite(LED_FRENTE, LOW);
         digitalWrite(LED_RE, LOW);
         Serial.println("Indicador: PARADO");
-    }
-}
-
-// --- Conecta e inscreve no tópico MQTT ---
-void connectMQTT() {
-    if (WiFi.status() != WL_CONNECTED) return;
-    Serial.print("Conectando ao broker...");
-    while (!mqttClient.connected()) {
-        if (mqttClient.connect("RailFlow-S2-Trem", BROKER_USR_ID, BROKER_USR_PASS)) {
-            Serial.println("\nConectado ao MQTT!");
-            mqttClient.subscribe(TOPIC_TREMVEL_S2);
-            Serial.print("Inscrito no tópico: ");
-            Serial.println(TOPIC_TREMVEL_S2);
-        } else {
-            Serial.print(".");
-            delay(2000);
-        }
     }
 }
