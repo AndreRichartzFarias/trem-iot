@@ -12,21 +12,15 @@
 #define ULTRA_ECHO_PIN_2 33
 #define LED_YELLOW_PIN 19
 
-// --- Configurações de presença ---
+// --- Configuraçãoe presença ---
 #define PRESENCE_THRESHOLD 20.0  // Distância limite para detectar presença (cm)
-#define SENSOR_READ_INTERVAL 5000 // Intervalo de leitura dos sensores (ms)
 
 // --- Instancia sensores e comunicação ---
 Ultrasonic ultrasonic1(ULTRA_TRIG_PIN_1, ULTRA_ECHO_PIN_1);
 Ultrasonic ultrasonic2(ULTRA_TRIG_PIN_2, ULTRA_ECHO_PIN_2);
+
 WiFiClientSecure wifiClient;
 PubSubClient mqttClient(wifiClient);
-
-struct SensorState {
-    unsigned long lastPresenceChange = 0;
-    bool presenceDetected = false;
-};
-SensorState sensors;
 
 // --- Funções principais ---
 void setupHardware();
@@ -44,7 +38,6 @@ void setup() {
     mqttClient.setServer(BROKER_URL, BROKER_PORT); // Configura MQTT
     mqttClient.setCallback(callback); // Define função de callback
     connectMQTT();   // Conecta MQTT
-    publishData("RailFlow/S2/Debug", "Sistema inicializado");
     Serial.println("=== System Ready ===");
 }
 
@@ -80,8 +73,8 @@ void readSensors() {
     float distance2 = ultrasonic2.read();
     bool presence1 = (distance1 < PRESENCE_THRESHOLD);
     bool presence2 = (distance2 < PRESENCE_THRESHOLD);
-    static bool lastPresence1 = false;
-    static bool lastPresence2 = false;
+    static bool lastPresence1;
+    static bool lastPresence2;
     // Publica apenas se houver mudança de estado
     if (presence1 != lastPresence1) {
         lastPresence1 = presence1;
@@ -105,7 +98,6 @@ void connectWiFi() {
     }
     if (WiFi.status() == WL_CONNECTED) {
         Serial.println(" Connected!");
-        Serial.println("IP: " + WiFi.localIP().toString());
     } else {
         Serial.println(" Failed!");
     }
