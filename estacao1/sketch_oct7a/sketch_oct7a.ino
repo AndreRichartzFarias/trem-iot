@@ -174,7 +174,7 @@ void connectMQTT() {
     
     unsigned long startTime = millis();
     while (!mqttClient.connected() && millis() - startTime < 15000) {
-        if (mqttClient.connect(clientID.c_str(), MQTT_USER_CONN, MQTT_PASSWORD_CONN)) {
+        if (mqttClient.connect(clientID.c_str(), BROKER_USR_ID, BROKER_USR_PASS)) {
             Serial.println(" Connected!");
             
             // Subscribe to relevant topics
