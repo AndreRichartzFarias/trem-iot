@@ -114,7 +114,7 @@ void connectMQTT() {
 
     unsigned long start = millis();
     while (!mqttClient.connected() && millis() - start < 15000) {
-        if (mqttClient.connect(clientID.c_str(), MQTT_USER_CONN, MQTT_PASSWORD_CONN)) {
+        if (mqttClient.connect(clientID.c_str(), BROKER_USR_ID, BROKER_USR_PASS)) {
             Serial.println(" connected");
             mqttClient.subscribe(topicPresenceSensor2_1);
             mqttClient.subscribe(topicPresenceSensor2_2);
