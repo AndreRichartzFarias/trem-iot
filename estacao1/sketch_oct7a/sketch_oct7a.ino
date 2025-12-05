@@ -107,8 +107,7 @@ void loop() {
 
 void readSensors() {
     unsigned long currentTime = millis();
-    
-    // Read temperature and humidity
+      // Read temperature and humidity
     if (currentTime - sensors.lastTempRead > SENSOR_READ_INTERVAL) {
         sensors.lastTempRead = currentTime;
         
@@ -134,14 +133,7 @@ void readSensors() {
     
     // Read ultrasonic sensor and check presence
     float distance = ultrasonic.read();
-    
-    // Publish distance every 3 seconds
-    static unsigned long lastDistancePublish = 0;
-    if (currentTime - lastDistancePublish > 3000) {
-        lastDistancePublish = currentTime;
-        publishData("RailFlow/S1/Distance", String(distance, 1));
-    }
-    
+
     // Check for presence changes
     bool currentPresence = (distance < PRESENCE_THRESHOLD);
     
