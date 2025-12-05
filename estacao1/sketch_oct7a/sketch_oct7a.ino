@@ -65,7 +65,6 @@ void setup() {
     mqttClient.setCallback(callback);
     connectMQTT();
     
-    publishData(topicDebug, "Sistema inicializado");
     Serial.println("=== System Ready ===");
 }
 
@@ -108,7 +107,8 @@ void loop() {
 
 void readSensors() {
     unsigned long currentTime = millis();
-      // Read temperature and humidity
+    
+    // Read temperature and humidity
     if (currentTime - sensors.lastTempRead > SENSOR_READ_INTERVAL) {
         sensors.lastTempRead = currentTime;
         
